@@ -107,9 +107,10 @@
                 clearInterval(interval);
                 spinning = false;
                 const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
-                alert("Você ganhou: " + options[winnerIndex] + "\\n\\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\\n\\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
-                localStorage.setItem('roletaGirada', 'true');
-                document.getElementById('spinButton').disabled = true;
+alert("Você ganhou: " + options[winnerIndex] + "\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
+localStorage.setItem('roletaGirada', 'true');
+document.getElementById('spinButton').disabled = true;
+                
             }
         }, 10);
     }

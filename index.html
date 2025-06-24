@@ -1,167 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Booze Street Culture - Roleta de Prêmios (Modo Teste)</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background-color: black;
-            color: white;
-        }
-        #container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            margin-top: 20px;
-        }
-        #wheelCanvas {
-            border: 5px solid #fff;
-            border-radius: 50%;
-            background-color: rgba(0,0,0,0.7);
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            margin-top: 20px;
-            background-color: #00FFD1;
-            color: black;
-            border: none;
-            cursor: pointer;
-        }
-        button:disabled {
-            background-color: #555;
-            color: #ccc;
-        }
-        .info-message {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #00FFD1;
-        }
-        .gif-side {
-            margin-left: 20px;
-            max-width: 250px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Booze Street Culture - Roleta de Prêmios (Modo Teste)</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+    }
+    #container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+    #wheelCanvas {
+      border: 5px solid #fff;
+      border-radius: 50%;
+      background-color: rgba(0,0,0,0.7);
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      margin-top: 20px;
+      background-color: #00FFD1;
+      color: black;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #555;
+      color: #ccc;
+    }
+    .info-message {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #00FFD1;
+    }
+    .gif-side {
+      margin-left: 20px;
+      max-width: 250px;
+    }
+  </style>
 </head>
 <body>
 
 <h1>Booze Street Culture - Roleta de Prêmios (Modo Teste)</h1>
 
 <div id="container">
-    <canvas id="wheelCanvas" width="400" height="400"></canvas>
-    <img src="print_message.png" alt="Compartilhe no Instagram" class="gif-side">
+  <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  <img src="print_message.png" alt="Compartilhe no Instagram" class="gif-side">
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p id="message"></p>
-
 <p class="info-message">Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.</p>
 
 <script>
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const options = [
-        "1 Copo Booze",
-        "1 Camisa",
-        "1 Shot",
-        "1 Ingresso Booze Street",
-        "Desconto de 30%",
-        "Desconto de 15%"
-    ];
-    const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const options = [
+    "1 Copo Booze",
+    "1 Camisa",
+    "1 Shot",
+    "1 Ingresso Booze Street",
+    "Desconto de 30%",
+    "Desconto de 15%"
+  ];
+  const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
+  let startAngle = 0;
+  let spinning = false;
+
+  function drawWheel() {
+    const arcSize = (2 * Math.PI) / options.length;
+    for (let i = 0; i < options.length; i++) {
+      const angle = startAngle + i * arcSize;
+      ctx.beginPath();
+      ctx.moveTo(200, 200);
+      ctx.arc(200, 200, 200, angle, angle + arcSize);
+      ctx.fillStyle = colors[i];
+      ctx.fill();
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(200, 200);
+      ctx.rotate(angle + arcSize / 2);
+      ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
+      ctx.font = "bold 14px Arial";
+      ctx.fillText(options[i], 60, 0);
+      ctx.restore();
+    }
+  }
+
+  function gerarCodigoUnico() {
+    const data = new Date();
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const hora = String(data.getHours()).padStart(2, '0');
+    const minuto = String(data.getMinutes()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 10000);
+    return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
+  }
+
+  function spinWheel() {
+    if (localStorage.getItem('roletaGirada') === 'true') {
+      alert("Você já girou a roleta.");
+      return;
+    }
+
+    if (spinning) return;
+    spinning = true;
+
     let angle = 0;
-    let spinning = false;
+    let spinTime = 0;
+    const spinTimeTotal = Math.random() * 3000 + 3000;
 
-    function drawWheel() {
-        const arcSize = (2 * Math.PI) / options.length;
-        for (let i = 0; i < options.length; i++) {
-            const startAngle = angle + i * arcSize;
-            ctx.beginPath();
-            ctx.moveTo(200, 200);
-            ctx.arc(200, 200, 200, startAngle, startAngle + arcSize);
-            ctx.fillStyle = colors[i];
-            ctx.fill();
-            ctx.stroke();
-            ctx.save();
-            ctx.translate(200, 200);
-            ctx.rotate(startAngle + arcSize / 2);
-            ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
-            ctx.font = "bold 14px Arial";
-            ctx.fillText(options[i], 60, 0);
-            ctx.restore();
-        }
-    }
+    const interval = setInterval(() => {
+      angle += 0.1;
+      startAngle += 0.1;
+      ctx.clearRect(0, 0, 400, 400);
+      drawWheel();
+      spinTime += 10;
 
-    function spinWheel() {
-        if (spinning) return;
-        spinning = true;
-        let spins = Math.random() * 1000 + 2000;
-        let interval = setInterval(() => {
-            angle += 0.1;
-            ctx.clearRect(0, 0, 400, 400);
-            drawWheel();
-            spins -= 10;
-            if (spins <= 0) {
-                clearInterval(interval);
-                spinning = false;
-                const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
-alert("Você ganhou: " + options[winnerIndex] + "\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
-localStorage.setItem('roletaGirada', 'true');
-document.getElementById('spinButton').disabled = true;
+      if (spinTime >= spinTimeTotal) {
+        clearInterval(interval);
+        spinning = false;
+        const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
+        const premio = options[winnerIndex];
+        const codigo = gerarCodigoUnico();
 
-            }
-        }, 10);
-    }
+        alert(
+          `Você ganhou: ${premio}\n\n` +
+          `Seu código: ${codigo}\n\n` +
+          `Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n\n` +
+          `Tire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!`
+        );
 
-    drawWheel();
-
-    function gerarCodigoUnico() {
-      const data = new Date();
-      const dia = String(data.getDate()).padStart(2, '0');
-      const mes = String(data.getMonth() + 1).padStart(2, '0');
-      const hora = String(data.getHours()).padStart(2, '0');
-      const minuto = String(data.getMinutes()).padStart(2, '0');
-      const random = Math.floor(Math.random() * 10000);
-      return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
-    }
-
-    function spinWheel() {
-      if (localStorage.getItem('roletaGirada') === 'true') {
-        alert("Você já girou a roleta.");
-        return;
+        localStorage.setItem('roletaGirada', 'true');
+        document.getElementById('spinButton').disabled = true;
       }
+    }, 10);
+  }
 
-      let angle = 0;
-      let spinTime = 0;
-      const spinTimeTotal = Math.random() * 3000 + 3000;
-
-      const spin = setInterval(() => {
-        angle += 0.1;
-        startAngle += 0.1;
-        drawWheel();
-        spinTime += 10;
-
-        if (spinTime >= spinTimeTotal) {
-          clearInterval(spin);
-          const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
-          const premio = options[winnerIndex];
-          const codigo = gerarCodigoUnico();
-
-          alert(
-            `Você ganhou: ${premio}\n` +
-            `Seu código: ${codigo}\n` +
-            `Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n` +
-            `Tire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!`
-          );
-
-          localStorage.setItem('roletaGirada', 'true');
-          document.getElementById('spinButton').disabled = true;
-        }
-      }, 10);
-    }
-    
+  drawWheel();
 </script>
 
 </body>

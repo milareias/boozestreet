@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Booze Street Culture - Roleta de Prêmios (TESTE LIVRE)</title>
+    <title>Booze Street Culture - Roleta de Prêmios</title>
     <style>
         body {
             text-align: center;
@@ -11,15 +10,10 @@
             background-color: black;
             color: white;
         }
-        #container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            margin-top: 20px;
-        }
         #wheelCanvas {
             border: 5px solid #fff;
             border-radius: 50%;
+            margin-top: 20px;
             background-color: rgba(0,0,0,0.7);
         }
         button {
@@ -31,32 +25,24 @@
             border: none;
             cursor: pointer;
         }
-        .logo {
-            width: 150px;
-            margin-top: 10px;
+        button:disabled {
+            background-color: #555;
+            color: #ccc;
         }
         .info-message {
             margin-top: 20px;
             font-size: 14px;
             color: #00FFD1;
         }
-        .gif-side {
-            margin-left: 20px;
-            max-width: 250px;
-        }
     </style>
 </head>
 <body>
 
-<img src="booze_logo.png" alt="Booze Street Culture Logo" class="logo">
 <h1>Booze Street Culture - Roleta de Prêmios</h1>
 
-<div id="container">
-    <canvas id="wheelCanvas" width="400" height="400"></canvas>
-    <img src="print_message.gif" alt="Compartilhe no Instagram" class="gif-side">
-</div>
-
+<canvas id="wheelCanvas" width="400" height="400"></canvas><br>
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
+<p id="message"></p>
 
 <p class="info-message">Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.</p>
 
@@ -108,12 +94,33 @@
                 clearInterval(interval);
                 spinning = false;
                 const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
-                alert("Você ganhou: " + options[winnerIndex] + "\n\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
+                alert("Você ganhou: " + options[winnerIndex] + "\\n\\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\\n\\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
+                localStorage.setItem('roletaGirada', 'true');
+                document.getElementById('spinButton').disabled = true;
             }
         }, 10);
     }
 
     drawWheel();
+
+    window.onload = function() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        const hour = now.getHours();
+        const spinButton = document.getElementById('spinButton');
+        const message = document.getElementById('message');
+
+        if (year === 2025 && month === 6 && day === 28 && hour >= 18 && hour <= 23) {
+            if (localStorage.getItem('roletaGirada') === 'true') {
+                spinButton.disabled = true;
+            }
+        } else {
+            spinButton.disabled = true;
+            message.innerText = "A roleta só estará disponível no dia 28 de junho de 2025 entre 18h e 23h59.";
+        }
+    }
 </script>
 
 </body>

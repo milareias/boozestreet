@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booze Street Culture - Roleta de Prêmios (TESTE LIVRE)</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+        }
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        #wheelCanvas {
+            border: 5px solid #fff;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #00FFD1;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+        .logo {
+            width: 150px;
+            margin-top: 10px;
+        }
+        .info-message {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #00FFD1;
+        }
+        .gif-side {
+            margin-left: 20px;
+            max-width: 250px;
+        }
+    </style>
+</head>
+<body>
+
+<img src="booze_logo.png" alt="Booze Street Culture Logo" class="logo">
+<h1>Booze Street Culture - Roleta de Prêmios</h1>
+
+<div id="container">
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    <img src="print_message.gif" alt="Compartilhe no Instagram" class="gif-side">
+</div>
+
+<button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
+
+<p class="info-message">Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.</p>
+
+<script>
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const options = [
+        "1 Copo Booze",
+        "1 Camisa",
+        "1 Shot",
+        "1 Ingresso",
+        "Desconto de 30%",
+        "Desconto de 15%"
+    ];
+    const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
+    let angle = 0;
+    let spinning = false;
+
+    function drawWheel() {
+        const arcSize = (2 * Math.PI) / options.length;
+        for (let i = 0; i < options.length; i++) {
+            const startAngle = angle + i * arcSize;
+            ctx.beginPath();
+            ctx.moveTo(200, 200);
+            ctx.arc(200, 200, 200, startAngle, startAngle + arcSize);
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+            ctx.stroke();
+            ctx.save();
+            ctx.translate(200, 200);
+            ctx.rotate(startAngle + arcSize / 2);
+            ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText(options[i], 60, 0);
+            ctx.restore();
+        }
+    }
+
+    function spinWheel() {
+        if (spinning) return;
+        spinning = true;
+        let spins = Math.random() * 1000 + 2000;
+        let interval = setInterval(() => {
+            angle += 0.1;
+            ctx.clearRect(0, 0, 400, 400);
+            drawWheel();
+            spins -= 10;
+            if (spins <= 0) {
+                clearInterval(interval);
+                spinning = false;
+                const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
+                alert("Você ganhou: " + options[winnerIndex] + "\n\nOs prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n\nTire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!");
+            }
+        }, 10);
+    }
+
+    drawWheel();
+</script>
+
+</body>
+</html>

@@ -10,10 +10,15 @@
             background-color: black;
             color: white;
         }
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
         #wheelCanvas {
             border: 5px solid #fff;
             border-radius: 50%;
-            margin-top: 20px;
             background-color: rgba(0,0,0,0.7);
         }
         button {
@@ -29,10 +34,18 @@
             background-color: #555;
             color: #ccc;
         }
+        .logo {
+            width: 150px;
+            margin-top: 10px;
+        }
         .info-message {
             margin-top: 20px;
             font-size: 14px;
             color: #00FFD1;
+        }
+        .gif-side {
+            margin-left: 20px;
+            max-width: 250px;
         }
     </style>
 </head>
@@ -40,7 +53,11 @@
 
 <h1>Booze Street Culture - Roleta de Prêmios</h1>
 
-<canvas id="wheelCanvas" width="400" height="400"></canvas><br>
+<div id="container">
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    <img src="print_message.gif" alt="Compartilhe no Instagram" class="gif-side">
+</div>
+
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
 <p id="message"></p>
 
@@ -115,6 +132,7 @@
         if (year === 2025 && month === 6 && day === 28 && hour >= 18 && hour <= 23) {
             if (localStorage.getItem('roletaGirada') === 'true') {
                 spinButton.disabled = true;
+                message.innerText = "Você já participou da roleta.";
             }
         } else {
             spinButton.disabled = true;

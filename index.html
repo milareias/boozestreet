@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Booze Street Culture - Roleta de Prêmios (Modo Teste)</title>
+  <title>Booze Street Culture - Roleta de Prêmios</title>
   <style>
     body {
       text-align: center;
@@ -47,7 +47,7 @@
 </head>
 <body>
 
-<h1>Booze Street Culture - Roleta de Prêmios (Modo Teste)</h1>
+<h1>Booze Street Culture - Roleta de Prêmios</h1>
 
 <div id="container">
   <canvas id="wheelCanvas" width="400" height="400"></canvas>
@@ -125,12 +125,16 @@
       if (spinTime >= spinTimeTotal) {
         clearInterval(interval);
         spinning = false;
+
         const winnerIndex = Math.floor((options.length - ((angle / (2 * Math.PI)) % 1) * options.length)) % options.length;
         const premio = options[winnerIndex];
         const codigo = gerarCodigoUnico();
 
+        const destaque = premio === "1 Ingresso Booze Street" ? "⭐ " : "";
+        const destaqueFim = premio === "1 Ingresso Booze Street" ? " ⭐" : "";
+
         alert(
-          `Você ganhou: ${premio}\n\n` +
+          `${destaque}Você ganhou: ${premio}${destaqueFim}\n\n` +
           `Seu código: ${codigo}\n\n` +
           `Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n\n` +
           `Tire um print da tela e compartilhe com a gente no @festabooze para garantir o seu prêmio!`

@@ -55,6 +55,8 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
+<p id="message"></p>
+
 <p class="info-message">Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.</p>
 
 <script>
@@ -88,7 +90,6 @@
       ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
       ctx.font = "bold 14px Arial";
 
-      // 🎯 Tratamento para quebrar o texto do ingresso em duas linhas
       if (options[i] === "1 Ingresso Booze Street") {
         ctx.fillText("1 Ingresso", 60, -10);
         ctx.fillText("Booze Street", 60, 10);
@@ -110,7 +111,32 @@
     return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
   }
 
+  function verificarHorarioPermitido() {
+    const agora = new Date();
+    const dia = agora.getDate();
+    const mes = agora.getMonth() + 1;
+    const ano = agora.getFullYear();
+    const hora = agora.getHours();
+
+    if (
+      ano === 2025 &&
+      mes === 6 &&
+      dia === 28 &&
+      hora >= 21 &&
+      hora <= 23
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function spinWheel() {
+    if (!verificarHorarioPermitido()) {
+      alert("A roleta só estará disponível no dia 28 de junho de 2025 entre 21h00 e 23h59.");
+      return;
+    }
+
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;
@@ -121,7 +147,7 @@
 
     let angle = 0;
     let spinTime = 0;
-    const spinTimeTotal = 5000; // 🕒 Agora gira por 5 segundos
+    const spinTimeTotal = 5000; // Tempo de giro: 5 segundos
 
     const interval = setInterval(() => {
       angle += 0.1;

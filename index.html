@@ -87,7 +87,15 @@
       ctx.rotate(angle + arcSize / 2);
       ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
       ctx.font = "bold 14px Arial";
-      ctx.fillText(options[i], 60, 0);
+
+      // 🎯 Tratamento para quebrar o texto do ingresso em duas linhas
+      if (options[i] === "1 Ingresso Booze Street") {
+        ctx.fillText("1 Ingresso", 60, -10);
+        ctx.fillText("Booze Street", 60, 10);
+      } else {
+        ctx.fillText(options[i], 60, 0);
+      }
+
       ctx.restore();
     }
   }
@@ -113,7 +121,7 @@
 
     let angle = 0;
     let spinTime = 0;
-    const spinTimeTotal = Math.random() * 3000 + 3000;
+    const spinTimeTotal = 5000; // 🕒 Agora gira por 5 segundos
 
     const interval = setInterval(() => {
       angle += 0.1;

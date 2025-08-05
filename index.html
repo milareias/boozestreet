@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Booze Street Culture - Roleta de Prêmios</title>
+  <title>Booze Street Culture - Roleta de Prêmios (Teste)</title>
   <style>
     body {
       text-align: center;
@@ -39,36 +39,29 @@
       font-size: 14px;
       color: #00FFD1;
     }
-    .gif-side {
-      margin-left: 20px;
-      max-width: 250px;
-    }
   </style>
 </head>
 <body>
 
-<h1>Booze Street Culture - Roleta de Prêmios</h1>
+<h1>Booze Street Culture - Roleta de Prêmios (Teste)</h1>
 
 <div id="container">
   <canvas id="wheelCanvas" width="400" height="400"></canvas>
-  <img src="print_message.png" alt="Compartilhe no Instagram" class="gif-side">
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p id="message"></p>
-
-<p class="info-message">Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.</p>
+<p class="info-message">Essa versão está liberada para testes a qualquer momento.</p>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
   const options = [
     "1 Copo Booze",
-    "1 Camisa",
-    "1 Shot",
-    "1 Ingresso Booze Street",
-    "Desconto de 30%",
-    "Desconto de 15%"
+    "1 Chapéu Personalizado",
+    "1 Imã de Geladeira",
+    "Não foi dessa vez",
+    "1 Óculos KF",
+    "1 Amstel Vibes"
   ];
   const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
   let startAngle = 0;
@@ -90,11 +83,16 @@
       ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
       ctx.font = "bold 14px Arial";
 
-      if (options[i] === "1 Ingresso Booze Street") {
-        ctx.fillText("1 Ingresso", 60, -10);
-        ctx.fillText("Booze Street", 60, 10);
+      const texto = options[i];
+      if (texto.length > 16) {
+        const partes = texto.split(" ");
+        const meio = Math.ceil(partes.length / 2);
+        const linha1 = partes.slice(0, meio).join(" ");
+        const linha2 = partes.slice(meio).join(" ");
+        ctx.fillText(linha1, 60, -10);
+        ctx.fillText(linha2, 60, 10);
       } else {
-        ctx.fillText(options[i], 60, 0);
+        ctx.fillText(texto, 60, 0);
       }
 
       ctx.restore();
@@ -111,32 +109,7 @@
     return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
   }
 
-  function verificarHorarioPermitido() {
-    const agora = new Date();
-    const dia = agora.getDate();
-    const mes = agora.getMonth() + 1;
-    const ano = agora.getFullYear();
-    const hora = agora.getHours();
-
-    if (
-      ano === 2025 &&
-      mes === 6 &&
-      dia === 28 &&
-      hora >= 22 &&
-      hora <= 23
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   function spinWheel() {
-    if (!verificarHorarioPermitido()) {
-      alert("A roleta só estará disponível no dia 28 de junho de 2025 entre 22h00 e 23h59.");
-      return;
-    }
-
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;
@@ -147,7 +120,7 @@
 
     let angle = 0;
     let spinTime = 0;
-    const spinTimeTotal = 5000; // Tempo de giro: 5 segundos
+    const spinTimeTotal = 5000;
 
     const interval = setInterval(() => {
       angle += 0.1;
@@ -164,14 +137,10 @@
         const premio = options[winnerIndex];
         const codigo = gerarCodigoUnico();
 
-        const destaque = premio === "1 Ingresso Booze Street" ? "⭐ " : "";
-        const destaqueFim = premio === "1 Ingresso Booze Street" ? " ⭐" : "";
-
         alert(
-          `${destaque}Você ganhou: ${premio}${destaqueFim}\n\n` +
-          `Seu código: ${codigo}\n\n` +
-          `Os prêmios serão retirados durante a Booze Street Culture, no dia 9 de agosto de 2025.\n\n` +
-          `Tire um print da tela e poste nos stories marcando o @festabooze para garantir o seu prêmio!`
+          `🎉 Você ganhou: ${premio}\n` +
+          `🔑 Código: ${codigo}\n\n` +
+          `📸 Tire um print da tela e marque a gente no @festabooze para garantir o seu prêmio!`
         );
 
         localStorage.setItem('roletaGirada', 'true');

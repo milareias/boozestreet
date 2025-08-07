@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Booze Street Culture - Roleta de Prêmios (Teste)</title>
   <style>
     body {
@@ -61,8 +61,8 @@
 <div id="container">
   <canvas id="wheelCanvas" width="400" height="400"></canvas>
   <div class="gif-side">
-    <img src="print_message.png" alt="Compartilhe no Instagram">
-    <img src="logo_boozest.png" alt="Booze Logo">
+    <img src="print_message.png" alt="Compartilhe no Instagram" />
+    <img src="logo_boozest.png" alt="Booze Logo" />
   </div>
 </div>
 
@@ -72,7 +72,7 @@
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
-  const R = 200; // raio da roleta
+  const R = 200; // raio
 
   const options = [
     "1 Copo Booze",
@@ -84,8 +84,8 @@
   ];
   const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
 
-  let startAngle = 0;   // ângulo acumulado da roleta
-  let spinning = false; // trava para um giro por sessão
+  let startAngle = 0;
+  let spinning = false;
 
   function drawWheel() {
     const arcSize = (2 * Math.PI) / options.length;
@@ -124,26 +124,6 @@
     }
   }
 
-  // ponteiro no topo (12h)
-  function drawPointer() {
-    ctx.save();
-    ctx.translate(R, R);
-    ctx.beginPath();
-    ctx.moveTo(0, -R - 10);     // ponta
-    ctx.lineTo(12, -R + 15);
-    ctx.lineTo(-12, -R + 15);
-    ctx.closePath();
-    ctx.fillStyle = '#00FFD1';
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawWheel();
-    drawPointer();
-  }
-
   function gerarCodigoUnico() {
     const data = new Date();
     const dia = String(data.getDate()).padStart(2, '0');
@@ -154,7 +134,7 @@
     return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
   }
 
-  // animação com destino aleatório + ease-out e ponteiro no topo
+  // VERSÃO ANTERIOR (sem ponteiro): rotação aleatória + ease-out
   function spinWheel() {
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
@@ -163,52 +143,50 @@
     if (spinning) return;
     spinning = true;
 
-    const arcSize = (2 * Math.PI) / options.length;
+    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // 5–15 voltas
+    const duration = 4000; // 4s
+    let start = null;
 
-    // 5–15 voltas + deslocamento aleatório até 1 fatia, para não concentrar sempre no mesmo ponto
-    const totalRotation = (Math.PI * 10 * (0.5 + Math.random())) + (Math.random() * arcSize);
-    const duration = 3000; // 3s
-    let startTs = null;
+    function animate(timestamp) {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      const t = Math.min(progress / duration, 1);
+      const easing = 1 - Math.pow(1 - t, 3); // ease-out
+      const currentRotation = totalRotation * easing;
+      startAngle = currentRotation;
 
-    function animate(ts) {
-      if (!startTs) startTs = ts;
-      const progress = Math.min((ts - startTs) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3); // ease-out cúbico
-      startAngle = totalRotation * ease;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawWheel();
 
-      render();
-
-      if (progress < 1) {
+      if (progress < duration) {
         requestAnimationFrame(animate);
       } else {
-        finalizarSorteio();
+        spinning = false;
+
+        const arcSize = (2 * Math.PI) / options.length;
+        const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        const winnerIndex = Math.floor(normalizedAngle / arcSize);
+
+        const premio = options[winnerIndex];
+        const codigo = gerarCodigoUnico();
+
+        alert(
+          `🎉 Você ganhou: ${premio}\n` +
+          `🔑 Código: ${codigo}\n\n` +
+          `📸 Tire um print da tela e marque a gente no @festabooze para garantir o seu prêmio!`
+        );
+
+        localStorage.setItem('roletaGirada', 'true');
+        document.getElementById('spinButton').disabled = true;
       }
-    }
-
-    function finalizarSorteio() {
-      // normaliza ângulo e ajusta o índice para o PONTEIRO NO TOPO (12h)
-      const normalized = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-      const adjusted = (normalized - Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
-      const winnerIndex = Math.floor(adjusted / arcSize);
-
-      const premio = options[winnerIndex];
-      const codigo = gerarCodigoUnico();
-
-      alert(
-        `🎉 Você ganhou: ${premio}\n` +
-        `🔑 Código: ${codigo}\n\n` +
-        `📸 Tire um print da tela e marque a gente no @festabooze para garantir o seu prêmio!`
-      );
-
-      localStorage.setItem('roletaGirada', 'true');
-      document.getElementById('spinButton').disabled = true;
-      spinning = false;
     }
 
     requestAnimationFrame(animate);
   }
 
-  render(); // primeira renderização
+  // primeira renderização
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawWheel();
 </script>
 
 </body>

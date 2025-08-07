@@ -16,6 +16,7 @@
       justify-content: center;
       align-items: flex-start;
       margin-top: 20px;
+      gap: 20px;
     }
     #wheelCanvas {
       border: 5px solid #fff;
@@ -41,7 +42,6 @@
       color: #00FFD1;
     }
     .gif-side {
-      margin-left: 20px;
       max-width: 150px;
       display: flex;
       flex-direction: column;
@@ -50,6 +50,7 @@
     .gif-side img {
       max-width: 150px;
       margin-top: 10px;
+      height: auto;
     }
   </style>
 </head>
@@ -71,6 +72,8 @@
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
+  const R = 200; // raio da roleta
+
   const options = [
     "1 Copo Booze",
     "1 Chapéu Personalizado",
@@ -80,21 +83,27 @@
     "1 Amstel Vibes"
   ];
   const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
-  let startAngle = 0;
-  let spinning = false;
+
+  let startAngle = 0;   // ângulo acumulado da roleta
+  let spinning = false; // trava para um giro por sessão
 
   function drawWheel() {
     const arcSize = (2 * Math.PI) / options.length;
     for (let i = 0; i < options.length; i++) {
       const angle = startAngle + i * arcSize;
+
+      // fatia
       ctx.beginPath();
-      ctx.moveTo(200, 200);
-      ctx.arc(200, 200, 200, angle, angle + arcSize);
+      ctx.moveTo(R, R);
+      ctx.arc(R, R, R, angle, angle + arcSize);
       ctx.fillStyle = colors[i];
       ctx.fill();
+      ctx.strokeStyle = '#222';
       ctx.stroke();
+
+      // texto
       ctx.save();
-      ctx.translate(200, 200);
+      ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
       ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
       ctx.font = "bold 14px Arial";
@@ -105,14 +114,34 @@
         const meio = Math.ceil(partes.length / 2);
         const linha1 = partes.slice(0, meio).join(" ");
         const linha2 = partes.slice(meio).join(" ");
-        ctx.fillText(linha1, 60, -10);
-        ctx.fillText(linha2, 60, 10);
+        ctx.fillText(linha1, R * 0.3, -10);
+        ctx.fillText(linha2, R * 0.3, 10);
       } else {
-        ctx.fillText(texto, 60, 0);
+        ctx.fillText(texto, R * 0.3, 0);
       }
 
       ctx.restore();
     }
+  }
+
+  // ponteiro no topo (12h)
+  function drawPointer() {
+    ctx.save();
+    ctx.translate(R, R);
+    ctx.beginPath();
+    ctx.moveTo(0, -R - 10);     // ponta
+    ctx.lineTo(12, -R + 15);
+    ctx.lineTo(-12, -R + 15);
+    ctx.closePath();
+    ctx.fillStyle = '#00FFD1';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawWheel();
+    drawPointer();
   }
 
   function gerarCodigoUnico() {
@@ -125,37 +154,42 @@
     return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
   }
 
+  // animação com destino aleatório + ease-out e ponteiro no topo
   function spinWheel() {
-  if (localStorage.getItem('roletaGirada') === 'true') {
-    alert("Você já girou a roleta.");
-    return;
-  }
+    if (localStorage.getItem('roletaGirada') === 'true') {
+      alert("Você já girou a roleta.");
+      return;
+    }
+    if (spinning) return;
+    spinning = true;
 
-  if (spinning) return;
-  spinning = true;
+    const arcSize = (2 * Math.PI) / options.length;
 
-  let totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // entre 5 e 15 voltas
-  let duration = 4000; // duração do giro (4 segundos)
-  let start = null;
+    // 5–15 voltas + deslocamento aleatório até 1 fatia, para não concentrar sempre no mesmo ponto
+    const totalRotation = (Math.PI * 10 * (0.5 + Math.random())) + (Math.random() * arcSize);
+    const duration = 3000; // 3s
+    let startTs = null;
 
-  function animate(timestamp) {
-    if (!start) start = timestamp;
-    const progress = timestamp - start;
-    const easing = 1 - Math.pow(1 - progress / duration, 3); // ease-out
-    const currentRotation = totalRotation * easing;
-    startAngle = currentRotation;
+    function animate(ts) {
+      if (!startTs) startTs = ts;
+      const progress = Math.min((ts - startTs) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3); // ease-out cúbico
+      startAngle = totalRotation * ease;
 
-    ctx.clearRect(0, 0, 400, 400);
-    drawWheel();
+      render();
 
-    if (progress < duration) {
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        finalizarSorteio();
+      }
+    }
 
-      const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-      const arcSize = (2 * Math.PI) / options.length;
-      const winnerIndex = Math.floor(normalizedAngle / arcSize);
+    function finalizarSorteio() {
+      // normaliza ângulo e ajusta o índice para o PONTEIRO NO TOPO (12h)
+      const normalized = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const adjusted = (normalized - Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
+      const winnerIndex = Math.floor(adjusted / arcSize);
 
       const premio = options[winnerIndex];
       const codigo = gerarCodigoUnico();
@@ -168,13 +202,13 @@
 
       localStorage.setItem('roletaGirada', 'true');
       document.getElementById('spinButton').disabled = true;
+      spinning = false;
     }
+
+    requestAnimationFrame(animate);
   }
 
-  requestAnimationFrame(animate);
-}
-
-  drawWheel();
+  render(); // primeira renderização
 </script>
 
 </body>

@@ -115,48 +115,53 @@
   }
 
   function spinWheel() {
-    if (localStorage.getItem('roletaGirada') === 'true') {
-      alert("Você já girou a roleta.");
-      return;
-    }
-
-    if (spinning) return;
-    spinning = true;
-
-    let angle = 0;
-    let spinTime = 0;
-    const spinTimeTotal = 1500;
-
-    const interval = setInterval(() => {
-      angle += 0.1;
-      startAngle += 0.1;
-      ctx.clearRect(0, 0, 400, 400);
-      drawWheel();
-      spinTime += 10;
-
-      if (spinTime >= spinTimeTotal) {
-        clearInterval(interval);
-        spinning = false;
-
-        // 🛠️ Correção do sorteio aleatório
-        const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-        const arcSize = (2 * Math.PI) / options.length;
-        const winnerIndex = Math.floor(normalizedAngle / arcSize);
-
-        const premio = options[winnerIndex];
-        const codigo = gerarCodigoUnico();
-
-        alert(
-          `🎉 Você ganhou: ${premio}\n` +
-          `🔑 Código: ${codigo}\n\n` +
-          `📸 Tire um print da tela e marque a gente no @festabooze para garantir o seu prêmio!`
-        );
-
-        localStorage.setItem('roletaGirada', 'true');
-        document.getElementById('spinButton').disabled = true;
-      }
-    }, 10);
+  if (localStorage.getItem('roletaGirada') === 'true') {
+    alert("Você já girou a roleta.");
+    return;
   }
+
+  if (spinning) return;
+  spinning = true;
+
+  let totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // entre 5 e 15 voltas
+  let duration = 4000; // duração do giro (4 segundos)
+  let start = null;
+
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    const progress = timestamp - start;
+    const easing = 1 - Math.pow(1 - progress / duration, 3); // ease-out
+    const currentRotation = totalRotation * easing;
+    startAngle = currentRotation;
+
+    ctx.clearRect(0, 0, 400, 400);
+    drawWheel();
+
+    if (progress < duration) {
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+
+      const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const arcSize = (2 * Math.PI) / options.length;
+      const winnerIndex = Math.floor(normalizedAngle / arcSize);
+
+      const premio = options[winnerIndex];
+      const codigo = gerarCodigoUnico();
+
+      alert(
+        `🎉 Você ganhou: ${premio}\n` +
+        `🔑 Código: ${codigo}\n\n` +
+        `📸 Tire um print da tela e marque a gente no @festabooze para garantir o seu prêmio!`
+      );
+
+      localStorage.setItem('roletaGirada', 'true');
+      document.getElementById('spinButton').disabled = true;
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
 
   drawWheel();
 </script>

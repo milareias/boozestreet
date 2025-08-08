@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Booze Street Culture - Roleta de Prêmios </title>
+  <title>Booze Street Culture - Roleta de Prêmios</title>
   <style>
     body {
       text-align: center;
@@ -11,9 +11,7 @@
       background-size: cover;
       color: white;
     }
-    h1 {
-      color: #ee3b95;
-    }
+    h1 { color: #ee3b95; }
     #container {
       display: flex;
       justify-content: center;
@@ -38,11 +36,7 @@
     button:disabled {
       background-color: #555;
       color: #ccc;
-    }
-    .info-message {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #00FFD1;
+      cursor: not-allowed;
     }
     .estoque-message {
       margin-top: 10px;
@@ -75,22 +69,26 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="estoque-message">* Prêmios sujeitos à disponibilidade de estoque.</p>
+<p class="estoque-message"><strong><em>* Prêmios sujeitos à disponibilidade de estoque.</em></strong></p>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
-  const R = 250; // raio maior
+  const R = 250; // raio
 
+  // ✅ Adicionado mais um "1 Copo Booze", intercalado entre os prêmios
   const options = [
     "1 Copo Booze",
     "1 Amstel Vibes",
     "1 Imã de Geladeira",
     "1 Copo Booze",
     "1 Amstel Vibes",
-    "1 Chapeu personalizado"
+    "1 Chapeu personalizado",
+    "1 Copo Booze"
   ];
-  const colors = ["#000000", "#FFFFFF", "#000000", "#FFFFFF", "#000000", "#FFFFFF"];
+
+  // alterna preto e branco automaticamente conforme o índice
+  function sliceColor(i){ return i % 2 === 0 ? "#000000" : "#FFFFFF"; }
 
   let startAngle = 0;
   let spinning = false;
@@ -100,22 +98,28 @@
     for (let i = 0; i < options.length; i++) {
       const angle = startAngle + i * arcSize;
 
+      // fatia
       ctx.beginPath();
       ctx.moveTo(R, R);
       ctx.arc(R, R, R, angle, angle + arcSize);
-      ctx.fillStyle = colors[i];
+      ctx.fillStyle = sliceColor(i);
       ctx.fill();
       ctx.strokeStyle = '#222';
       ctx.stroke();
 
+      // texto
       ctx.save();
       ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
-      ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
+      ctx.fillStyle = sliceColor(i) === "#000000" ? "white" : "black";
       ctx.font = "bold 16px Arial";
 
       const texto = options[i];
-      if (texto.length > 16) {
+      if (texto === "1 Voucher para o Rua Pizza (fatia)") {
+        // quebra manual, se você voltar a usar este prêmio
+        ctx.fillText("1 Voucher para o", R * 0.3, -10);
+        ctx.fillText("Rua Pizza (fatia)", R * 0.3, 10);
+      } else if (texto.length > 16) {
         const partes = texto.split(" ");
         const meio = Math.ceil(partes.length / 2);
         ctx.fillText(partes.slice(0, meio).join(" "), R * 0.3, -10);
@@ -130,10 +134,37 @@
 
   function gerarCodigoUnico() {
     const data = new Date();
-    return `BZ${String(data.getDate()).padStart(2, '0')}${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getHours()).padStart(2, '0')}${String(data.getMinutes()).padStart(2, '0')}-${Math.floor(Math.random() * 10000)}`;
+    const d = String(data.getDate()).padStart(2,'0');
+    const m = String(data.getMonth()+1).padStart(2,'0');
+    const h = String(data.getHours()).padStart(2,'0');
+    const mi = String(data.getMinutes()).padStart(2,'0');
+    const r = Math.floor(Math.random()*10000);
+    return `BZ${d}${m}-${h}${mi}-${r}`;
+  }
+
+  // ✅ Bloqueio de horário: só funciona 09/08/2025 entre 21:00 e 23:59 (horário local do dispositivo)
+  function horarioPermitido() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = agora.getMonth() + 1; // 1-12
+    const dia = agora.getDate();
+    const hora = agora.getHours();    // 0-23
+
+    return (ano === 2025 && mes === 8 && dia === 9 && hora >= 21 && hora <= 23);
+  }
+
+  function atualizarEstadoBotao() {
+    const btn = document.getElementById('spinButton');
+    btn.disabled = !horarioPermitido() || localStorage.getItem('roletaGirada') === 'true';
   }
 
   function spinWheel() {
+    if (!horarioPermitido()) {
+      alert("A roleta só funciona no dia 09/08/2025 entre 21h00 e 23h59.");
+      atualizarEstadoBotao();
+      return;
+    }
+
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;
@@ -141,15 +172,15 @@
     if (spinning) return;
     spinning = true;
 
-    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5;
-    const duration = 4000;
+    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // 5–15 voltas
+    const duration = 4000; // 4s
     let start = null;
 
     function animate(timestamp) {
       if (!start) start = timestamp;
       const progress = timestamp - start;
       const t = Math.min(progress / duration, 1);
-      const easing = 1 - Math.pow(1 - t, 3);
+      const easing = 1 - Math.pow(1 - t, 3); // ease-out
       startAngle = totalRotation * easing;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -159,6 +190,7 @@
         requestAnimationFrame(animate);
       } else {
         spinning = false;
+
         const arcSize = (2 * Math.PI) / options.length;
         const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
         const winnerIndex = Math.floor(normalizedAngle / arcSize);
@@ -178,7 +210,10 @@
     requestAnimationFrame(animate);
   }
 
+  // render inicial e agenda checagem do botão (atualiza a cada 30s)
   drawWheel();
+  atualizarEstadoBotao();
+  setInterval(atualizarEstadoBotao, 30000);
 </script>
 
 </body>

@@ -17,7 +17,7 @@
     #container {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       margin-top: 20px;
       gap: 20px;
     }
@@ -44,11 +44,10 @@
       font-size: 14px;
       color: #00FFD1;
     }
-    .stock-message {
-      margin-top: 5px;
+    .estoque-message {
+      margin-top: 10px;
       font-size: 12px;
-      color: #FFD700;
-      font-style: italic;
+      color: white;
     }
     .gif-side {
       max-width: 150px;
@@ -65,10 +64,10 @@
 </head>
 <body>
 
-<h1>Booze Street Culture - Roleta de Prêmios </h1>
+<h1>Booze Street Culture - Roleta de Prêmios</h1>
 
 <div id="container">
-  <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  <canvas id="wheelCanvas" width="500" height="500"></canvas>
   <div class="gif-side">
     <img src="print_message.png" alt="Compartilhe no Instagram" />
     <img src="logo_boozest.png" alt="Booze Logo" />
@@ -76,12 +75,12 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="stock-message">*Prêmios sujeitos à disponibilidade de estoque.</p>
+<p class="estoque-message">* Prêmios sujeitos à disponibilidade de estoque.</p>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
-  const R = 200;
+  const R = 250; // raio maior
 
   const options = [
     "1 Copo Booze",
@@ -113,16 +112,14 @@
       ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
       ctx.fillStyle = colors[i] === "#000000" ? "white" : "black";
-      ctx.font = "bold 14px Arial";
+      ctx.font = "bold 16px Arial";
 
       const texto = options[i];
       if (texto.length > 16) {
         const partes = texto.split(" ");
         const meio = Math.ceil(partes.length / 2);
-        const linha1 = partes.slice(0, meio).join(" ");
-        const linha2 = partes.slice(meio).join(" ");
-        ctx.fillText(linha1, R * 0.3, -10);
-        ctx.fillText(linha2, R * 0.3, 10);
+        ctx.fillText(partes.slice(0, meio).join(" "), R * 0.3, -10);
+        ctx.fillText(partes.slice(meio).join(" "), R * 0.3, 10);
       } else {
         ctx.fillText(texto, R * 0.3, 0);
       }
@@ -133,12 +130,7 @@
 
   function gerarCodigoUnico() {
     const data = new Date();
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const hora = String(data.getHours()).padStart(2, '0');
-    const minuto = String(data.getMinutes()).padStart(2, '0');
-    const random = Math.floor(Math.random() * 10000);
-    return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
+    return `BZ${String(data.getDate()).padStart(2, '0')}${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getHours()).padStart(2, '0')}${String(data.getMinutes()).padStart(2, '0')}-${Math.floor(Math.random() * 10000)}`;
   }
 
   function spinWheel() {
@@ -158,8 +150,7 @@
       const progress = timestamp - start;
       const t = Math.min(progress / duration, 1);
       const easing = 1 - Math.pow(1 - t, 3);
-      const currentRotation = totalRotation * easing;
-      startAngle = currentRotation;
+      startAngle = totalRotation * easing;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawWheel();
@@ -168,11 +159,9 @@
         requestAnimationFrame(animate);
       } else {
         spinning = false;
-
         const arcSize = (2 * Math.PI) / options.length;
         const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
         const winnerIndex = Math.floor(normalizedAngle / arcSize);
-
         const premio = options[winnerIndex];
         const codigo = gerarCodigoUnico();
 
@@ -186,11 +175,9 @@
         document.getElementById('spinButton').disabled = true;
       }
     }
-
     requestAnimationFrame(animate);
   }
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawWheel();
 </script>
 

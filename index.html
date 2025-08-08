@@ -33,15 +33,18 @@
       border: none;
       cursor: pointer;
     }
-    button:disabled {
-      background-color: #555;
-      color: #ccc;
-      cursor: not-allowed;
-    }
+    button:disabled { background-color: #555; color: #ccc; cursor: not-allowed; }
     .estoque-message {
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 12px;
-      color: white;
+      color: yellow;
+      font-style: italic;
+      font-weight: bold;
+    }
+    .horario-info {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #ffd700;
     }
     .gif-side {
       max-width: 150px;
@@ -49,11 +52,7 @@
       flex-direction: column;
       align-items: center;
     }
-    .gif-side img {
-      max-width: 150px;
-      margin-top: 10px;
-      height: auto;
-    }
+    .gif-side img { max-width: 150px; margin-top: 10px; height: auto; }
   </style>
 </head>
 <body>
@@ -69,14 +68,15 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
+<p class="horario-info">Disponível hoje <strong>entre 21:00 e 23:00</strong>. <em>(Ativa a partir de 20:30)</em></p>
 <p class="estoque-message"><strong><em>* Prêmios sujeitos à disponibilidade de estoque.</em></strong></p>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
-  const R = 250; // raio
+  const R = 250;
 
-  // ✅ Adicionado mais um "1 Copo Booze", intercalado entre os prêmios
+  // 8 setores, com mais "1 Copo Booze" intercalado
   const options = [
     "1 Copo Booze",
     "1 Amstel Vibes",
@@ -87,9 +87,7 @@
     "1 Copo Booze",
     "1 Chapeu personalizado"
   ];
-
-  // alterna preto e branco automaticamente conforme o índice
-  function sliceColor(i){ return i % 2 === 0 ? "#000000" : "#FFFFFF"; }
+  const colors = ["#000","#fff","#000","#fff","#000","#fff","#000","#fff"];
 
   let startAngle = 0;
   let spinning = false;
@@ -99,11 +97,11 @@
     for (let i = 0; i < options.length; i++) {
       const angle = startAngle + i * arcSize;
 
-      // fatia
+      // setor
       ctx.beginPath();
       ctx.moveTo(R, R);
       ctx.arc(R, R, R, angle, angle + arcSize);
-      ctx.fillStyle = sliceColor(i);
+      ctx.fillStyle = colors[i];
       ctx.fill();
       ctx.strokeStyle = '#222';
       ctx.stroke();
@@ -112,15 +110,11 @@
       ctx.save();
       ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
-      ctx.fillStyle = sliceColor(i) === "#000000" ? "white" : "black";
+      ctx.fillStyle = colors[i] === "#000" ? "white" : "black";
       ctx.font = "bold 16px Arial";
 
       const texto = options[i];
-      if (texto === "1 Voucher para o Rua Pizza (fatia)") {
-        // quebra manual, se você voltar a usar este prêmio
-        ctx.fillText("1 Voucher para o", R * 0.3, -10);
-        ctx.fillText("Rua Pizza (fatia)", R * 0.3, 10);
-      } else if (texto.length > 16) {
+      if (texto.length > 16) {
         const partes = texto.split(" ");
         const meio = Math.ceil(partes.length / 2);
         ctx.fillText(partes.slice(0, meio).join(" "), R * 0.3, -10);
@@ -128,44 +122,45 @@
       } else {
         ctx.fillText(texto, R * 0.3, 0);
       }
-
       ctx.restore();
     }
   }
 
   function gerarCodigoUnico() {
-    const data = new Date();
-    const d = String(data.getDate()).padStart(2,'0');
-    const m = String(data.getMonth()+1).padStart(2,'0');
-    const h = String(data.getHours()).padStart(2,'0');
-    const mi = String(data.getMinutes()).padStart(2,'0');
-    const r = Math.floor(Math.random()*10000);
-    return `BZ${d}${m}-${h}${mi}-${r}`;
+    const d = new Date();
+    const dia = String(d.getDate()).padStart(2,'0');
+    const mes = String(d.getMonth()+1).padStart(2,'0');
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    const rand = Math.floor(Math.random()*10000);
+    return `BZ${dia}${mes}-${hh}${mm}-${rand}`;
   }
 
-  // ✅ Bloqueio de horário: só funciona 09/08/2025 entre 21:00 e 23:59 (horário local do dispositivo)
+  // Bloqueio: 09/08/2025 das 20:30 até 22:59:59 (23:00 já bloqueia)
   function horarioPermitido() {
     const agora = new Date();
     const ano = agora.getFullYear();
-    const mes = agora.getMonth() + 1; // 1-12
+    const mes = agora.getMonth() + 1;
     const dia = agora.getDate();
-    const hora = agora.getHours();    // 0-23
+    const hora = agora.getHours();
+    const minuto = agora.getMinutes();
 
-    return (ano === 2025 && mes === 8 && dia === 9 && hora >= 20:30 && hora <= 23);
-  }
-
-  function atualizarEstadoBotao() {
-    const btn = document.getElementById('spinButton');
-    btn.disabled = !horarioPermitido() || localStorage.getItem('roletaGirada') === 'true';
+    return (
+      ano === 2025 &&
+      mes === 8 &&
+      dia === 9 &&
+      (
+        (hora === 20 && minuto >= 30) || // 20:30–20:59
+        (hora >= 21 && hora < 23)        // 21:00–22:59
+      )
+    );
   }
 
   function spinWheel() {
     if (!horarioPermitido()) {
-      alert("A roleta só funciona no dia 09/08/2025 entre 21h00 e 23h59.");
-      atualizarEstadoBotao();
+      alert("A roleta só funciona hoje entre 21h00 e 23h00.");
       return;
     }
-
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;
@@ -177,24 +172,24 @@
     const duration = 4000; // 4s
     let start = null;
 
-    function animate(timestamp) {
-      if (!start) start = timestamp;
-      const progress = timestamp - start;
-      const t = Math.min(progress / duration, 1);
-      const easing = 1 - Math.pow(1 - t, 3); // ease-out
+    function animate(ts) {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const easing = 1 - Math.pow(1 - progress, 3); // ease-out
       startAngle = totalRotation * easing;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawWheel();
 
-      if (progress < duration) {
+      if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         spinning = false;
 
         const arcSize = (2 * Math.PI) / options.length;
-        const normalizedAngle = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-        const winnerIndex = Math.floor(normalizedAngle / arcSize);
+        const normalized = (startAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        const winnerIndex = Math.floor(normalized / arcSize);
+
         const premio = options[winnerIndex];
         const codigo = gerarCodigoUnico();
 
@@ -211,10 +206,7 @@
     requestAnimationFrame(animate);
   }
 
-  // render inicial e agenda checagem do botão (atualiza a cada 30s)
   drawWheel();
-  atualizarEstadoBotao();
-  setInterval(atualizarEstadoBotao, 30000);
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Booze Street Culture - Roleta de Prêmios (Teste)</title>
+  <title>Booze Street Culture - Roleta de Prêmios</title>
   <style>
     body {
       text-align: center;
@@ -68,7 +68,7 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="horario-info">⚠️ Versão liberada para testes - sem restrição de horário</p>
+<p class="horario-info">⚠️ Disponível apenas no dia 09/08/2025, entre 21h e 23h (ativação às 20h30)</p>
 <p class="estoque-message"><strong><em>* Prêmios sujeitos à disponibilidade de estoque.</em></strong></p>
 
 <script>
@@ -128,7 +128,27 @@
     return `BZ${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
   }
 
+  function horarioLiberado() {
+    const agora = new Date();
+    const diaEvento = 9;
+    const mesEvento = 7; // Agosto (0 = Janeiro)
+    const anoEvento = 2025;
+
+    if (agora.getFullYear() !== anoEvento || agora.getMonth() !== mesEvento || agora.getDate() !== diaEvento) {
+      return false;
+    }
+
+    const inicio = new Date(anoEvento, mesEvento, diaEvento, 20, 30);
+    const fim = new Date(anoEvento, mesEvento, diaEvento, 23, 0);
+    return agora >= inicio && agora <= fim;
+  }
+
   function spinWheel() {
+    if (!horarioLiberado()) {
+      alert("A roleta só estará disponível no dia 09/08/2025, das 21h às 23h (ativação às 20h30).");
+      return;
+    }
+
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;

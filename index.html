@@ -11,6 +11,9 @@
       background-size: cover;
       color: white;
     }
+    h1 {
+      color: #ee3b95;
+    }
     #container {
       display: flex;
       justify-content: center;
@@ -27,8 +30,8 @@
       padding: 12px 24px;
       font-size: 16px;
       margin-top: 20px;
-      background-color: #00FFD1;
-      color: black;
+      background-color: #ee3b95;
+      color: white;
       border: none;
       cursor: pointer;
     }
@@ -40,6 +43,12 @@
       margin-top: 20px;
       font-size: 14px;
       color: #00FFD1;
+    }
+    .stock-message {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #FFD700;
+      font-style: italic;
     }
     .gif-side {
       max-width: 150px;
@@ -67,18 +76,18 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="info-message">Essa versão está liberada para testes a qualquer momento.</p>
+<p class="stock-message">*Prêmios sujeitos à disponibilidade de estoque.</p>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
   const ctx = canvas.getContext('2d');
-  const R = 200; // raio
+  const R = 200;
 
   const options = [
     "1 Copo Booze",
     "1 Chapéu Personalizado",
     "1 Imã de Geladeira",
-    "Não foi dessa vez",
+    "1 Camisa",
     "1 Óculos KF",
     "1 Amstel Vibes"
   ];
@@ -92,7 +101,6 @@
     for (let i = 0; i < options.length; i++) {
       const angle = startAngle + i * arcSize;
 
-      // fatia
       ctx.beginPath();
       ctx.moveTo(R, R);
       ctx.arc(R, R, R, angle, angle + arcSize);
@@ -101,7 +109,6 @@
       ctx.strokeStyle = '#222';
       ctx.stroke();
 
-      // texto
       ctx.save();
       ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
@@ -134,7 +141,6 @@
     return `BZ${dia}${mes}-${hora}${minuto}-${random}`;
   }
 
-  // VERSÃO ANTERIOR (sem ponteiro): rotação aleatória + ease-out
   function spinWheel() {
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
@@ -143,15 +149,15 @@
     if (spinning) return;
     spinning = true;
 
-    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // 5–15 voltas
-    const duration = 4000; // 4s
+    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5;
+    const duration = 4000;
     let start = null;
 
     function animate(timestamp) {
       if (!start) start = timestamp;
       const progress = timestamp - start;
       const t = Math.min(progress / duration, 1);
-      const easing = 1 - Math.pow(1 - t, 3); // ease-out
+      const easing = 1 - Math.pow(1 - t, 3);
       const currentRotation = totalRotation * easing;
       startAngle = currentRotation;
 
@@ -184,7 +190,6 @@
     requestAnimationFrame(animate);
   }
 
-  // primeira renderização
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawWheel();
 </script>

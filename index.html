@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Booze Street Culture - Roleta de Prêmios</title>
+  <title>Booze Street Culture - Roleta de Prêmios (Teste)</title>
   <style>
     body {
       text-align: center;
@@ -68,7 +68,7 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="horario-info">Disponível hoje <strong>entre 21:00 e 23:00</strong>. </p>
+<p class="horario-info">⚠️ Versão liberada para testes - sem restrição de horário</p>
 <p class="estoque-message"><strong><em>* Prêmios sujeitos à disponibilidade de estoque.</em></strong></p>
 
 <script>
@@ -76,7 +76,6 @@
   const ctx = canvas.getContext('2d');
   const R = 250;
 
-  // 8 setores, com mais "1 Copo Booze" intercalado
   const options = [
     "1 Copo Booze",
     "1 Amstel Vibes",
@@ -97,7 +96,6 @@
     for (let i = 0; i < options.length; i++) {
       const angle = startAngle + i * arcSize;
 
-      // setor
       ctx.beginPath();
       ctx.moveTo(R, R);
       ctx.arc(R, R, R, angle, angle + arcSize);
@@ -106,7 +104,6 @@
       ctx.strokeStyle = '#222';
       ctx.stroke();
 
-      // texto
       ctx.save();
       ctx.translate(R, R);
       ctx.rotate(angle + arcSize / 2);
@@ -128,29 +125,10 @@
 
   function gerarCodigoUnico() {
     const d = new Date();
-    const dia = String(d.getDate()).padStart(2,'0');
-    const mes = String(d.getMonth()+1).padStart(2,'0');
-    const hh = String(d.getHours()).padStart(2,'0');
-    const mm = String(d.getMinutes()).padStart(2,'0');
-    const rand = Math.floor(Math.random()*10000);
-    return `BZ${dia}${mes}-${hh}${mm}-${rand}`;
-  }
-
-  // Bloqueio: 09/08/2025 das 20:30 até 22:59:59 (23:00 já bloqueia)
-  function horarioPermitido() {
-    const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = agora.getMonth() + 1;
-    const dia = agora.getDate();
-    const hora = agora.getHours();
-    const minuto = agora.getMinutes();
+    return `BZ${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}-${Math.floor(Math.random()*10000)}`;
   }
 
   function spinWheel() {
-    if (!horarioPermitido()) {
-      alert("A roleta só funciona hoje entre 21h00 e 23h00.");
-      return;
-    }
     if (localStorage.getItem('roletaGirada') === 'true') {
       alert("Você já girou a roleta.");
       return;
@@ -158,14 +136,14 @@
     if (spinning) return;
     spinning = true;
 
-    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5; // 5–15 voltas
-    const duration = 4000; // 4s
+    const totalRotation = Math.random() * Math.PI * 10 + Math.PI * 5;
+    const duration = 4000;
     let start = null;
 
     function animate(ts) {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
-      const easing = 1 - Math.pow(1 - progress, 3); // ease-out
+      const easing = 1 - Math.pow(1 - progress, 3);
       startAngle = totalRotation * easing;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);

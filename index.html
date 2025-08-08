@@ -68,7 +68,7 @@
 </div>
 
 <button id="spinButton" onclick="spinWheel()">Girar a Roleta</button>
-<p class="horario-info">Disponível hoje <strong>entre 21:00 e 23:00</strong>. <em>(Ativa a partir de 20:30)</em></p>
+<p class="horario-info">Disponível hoje <strong>entre 21:00 e 23:00</strong>. </p>
 <p class="estoque-message"><strong><em>* Prêmios sujeitos à disponibilidade de estoque.</em></strong></p>
 
 <script>
@@ -144,16 +144,6 @@
     const dia = agora.getDate();
     const hora = agora.getHours();
     const minuto = agora.getMinutes();
-
-    return (
-      ano === 2025 &&
-      mes === 8 &&
-      dia === 9 &&
-      (
-        (hora === 20 && minuto >= 30) || // 20:30–20:59
-        (hora >= 21 && hora < 23)        // 21:00–22:59
-      )
-    );
   }
 
   function spinWheel() {
